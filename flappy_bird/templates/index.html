@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Bird</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+        
+        .game-container {
+            text-align: center;
+        }
+        
+        #game-canvas {
+            border: 2px solid #333;
+            cursor: pointer;
+        }
+        
+        .score-display {
+            font-size: 24px;
+            margin-top: 10px;
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Flappy Bird</h1>
+        <img id="game-canvas" width="288" height="512" alt="Flappy Bird Game">
+        <div class="score-display">Score: <span id="score">0</span></div>
+        <div class="instructions">
+            <p>Click or press any key to make the bird jump</p>
+            <p>Avoid the pipes and don't hit the ground!</p>
+        </div>
+    </div>
+
+    <script>
+        const gameCanvas = document.getElementById('game-canvas');
+        const scoreDisplay = document.getElementById('score');
+        let gameState = {
+            game_over: false,
+            game_started: false,
+            score: 0
+        };
+
+        // Function to update the game state
+        async function updateGameState(action = null) {
+            const options = {
+                method: action ? 'POST' : 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            
+            if (action) {
+                options.body = JSON.stringify({ action });
+            }
+            
+            try {
+                const response = await fetch('/game_state', options);
+                const data = await response.json();
+                
+                // Update the game canvas
+                gameCanvas.src = `data:image/png;base64,${data.image}`;
+                
+                // Update the score
+                scoreDisplay.textContent = data.score;
+                
+                // Update game state
+                gameState = data;
+                
+                return data;
+            } catch (error) {
+                console.error('Error updating game state:', error);
+            }
+        }
+
+        // Initialize the game
+        updateGameState();
+
+        // Set up game loop
+        setInterval(() => {
+            if (gameState.game_started && !gameState.game_over) {
+                updateGameState();
+            }
+        }, 1000 / 60); // 60 FPS
+
+        // Handle user input
+        gameCanvas.addEventListener('click', () => {
+            if (gameState.game_over) {
+                updateGameState('restart');
+            } else {
+                updateGameState('jump');
+            }
+        });
+
+        // Handle keyboard input
+        document.addEventListener('keydown', (event) => {
+            if (gameState.game_over) {
+                updateGameState('restart');
+            } else {
+                updateGameState('jump');
+            }
+        });
+    </script>
+</body>
+</html>
