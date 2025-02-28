@@ -1,6 +1,6 @@
 # FlappyBird Game
 
-A simple FlappyBird game implemented in Python using Pygame and Flask for web browser play.
+A simple FlappyBird game implemented in Python using Pygame and Flask for web browser play. This game features custom-drawn sprites and a scrolling background.
 
 ## Features
 
